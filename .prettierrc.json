@@ -1,0 +1,14 @@
+{
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "htmlWhitespaceSensitivity": "ignore",
+  "jsonRecursiveSort": true,
+  "jsxSingleQuote": false,
+  "plugins": ["prettier-plugin-sort-json", "prettier-plugin-tailwindcss"],
+  "printWidth": 120,
+  "quoteProps": "consistent",
+  "semi": false,
+  "singleAttributePerLine": false,
+  "singleQuote": true,
+  "trailingComma": "all"
+}
