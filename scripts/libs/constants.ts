@@ -1,29 +1,27 @@
-import type { Platform } from 'esbuild'
+import type { Dirent } from 'fs'
 
 import { readdirSync } from 'fs'
 import { resolve } from 'path'
 
 export function getOptionEntries(platform: Platform): BuildEntries {
+  const flagRegex = /\.entry\./
+  const workerRegex = /workers/
   const { electron, source } = getDirs()
-  const buildFiles = readdirSync(source, { recursive: true, withFileTypes: true }).filter(({ name }) =>
-    /\.entry\./.test(name),
+  const buildFiles = readdirSync(source, { recursive: true, withFileTypes: true }).filter(
+    ({ name, path }) => flagRegex.test(name) || workerRegex.test(path),
   )
-  const getPlatformBuildFiles = (platform: Exclude<Platform, 'neutral'>) =>
-    buildFiles
-      .filter(({ name }) => new RegExp('\\.' + platform).test(name))
-      .map(({ name, path }) => ({
-        in: resolve(path, name),
-        out: resolve(path, name.replace(extPattern, '')).replace(new RegExp(source), electron),
-      }))
-  if (platform === 'node')
-    return {
-      paths: getPlatformBuildFiles('node'),
-      platform: 'node',
-    }
-  return {
-    paths: getPlatformBuildFiles('browser'),
-    platform: 'browser',
-  }
+  const platforms: Platform[] = ['node', 'browser']
+  const [nodeFiles, browserFiles] = platforms.map((platform) =>
+    buildFiles.filter(({ path }) => new RegExp(platform).test(path)),
+  )
+  const makeEntries = (files: Dirent[]) =>
+    files.map(({ name, path }) => ({
+      in: <`${string}.entry.${string}`>resolve(path, name),
+      out: resolve(path, name.replace(flagRegex, '.'))
+        .replace(new RegExp(source), electron)
+        .replace(/(\.[\w\d]+)$/, ''),
+    }))
+  return makeEntries(platform === 'node' ? nodeFiles : browserFiles)
 }
 
 export function getDirs() {

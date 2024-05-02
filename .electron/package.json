@@ -2,7 +2,7 @@
   "name": "mob-core",
   "version": "1.0.0",
   "description": "Mobius on ElectronJS",
-  "main": "main.js",
+  "main": "node/main.js",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
   },

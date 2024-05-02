@@ -1,5 +1,5 @@
 import type { FSWatcher } from 'chokidar'
-import type { BuildContext, BuildOptions, Message, Platform } from 'esbuild'
+import type { BuildContext, BuildOptions, Message } from 'esbuild'
 
 import { spawn } from 'child_process'
 import chokidar from 'chokidar'
@@ -15,10 +15,13 @@ main()
 
 async function main() {
   const { assets, source, types } = getDirs()
-  const entries = ['node', 'browser'].map((platform) => getOptionEntries(<Platform>platform))
+  const entries = ['node', 'browser'].map((platform) => ({
+    paths: getOptionEntries(<Platform>platform),
+    platform: <Platform>platform,
+  }))
   const contexts = await Promise.all(
-    entries.map((entry, index) =>
-      esbuild.context(getOptions({ cleanDisabled: index === 1, entry, resolvePathDisabled: index === 1 })),
+    entries.map(({ paths, platform }, index) =>
+      esbuild.context(getOptions({ cleanDisabled: index === 1, entry: paths, platform })),
     ),
   )
   const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
@@ -47,24 +50,19 @@ async function build(contexts: BuildContext[]) {
   )
 }
 
-function getOptions(options: {
-  cleanDisabled?: boolean
-  entry: BuildEntries
-  resolvePathDisabled?: boolean
-}): BuildOptions {
-  const { cleanDisabled, entry } = options
+function getOptions(options: { cleanDisabled?: boolean; entry: BuildEntries; platform: Platform }): BuildOptions {
+  const { cleanDisabled, entry, platform } = options
   const { electron } = getDirs()
-  const { paths, platform } = entry
   return {
     bundle: true,
-    entryPoints: paths,
+    entryPoints: entry,
     external: ['electron'],
     format: 'cjs',
     jsx: 'transform',
     legalComments: 'none',
     loader: { '.html': 'copy', '.json': 'copy' },
     logLevel: 'silent',
-    minify: false,
+    minify: isProd(),
     outdir: electron,
     platform,
     plugins: [clean(cleanDisabled), style()],

@@ -1,25 +1,26 @@
 import { getWorkerPaths } from '@libs/constants'
-import { app, BrowserWindow } from 'electron'
+import { BrowserWindow } from 'electron'
+import { app } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { Worker } from 'worker_threads'
 
-const WINDOW = new BrowserWindow()
-
 main()
 
-function main() {
-  app.on('ready', () => launch(WINDOW))
-  watch(WINDOW)
+async function main() {
+  await app.whenReady()
+  const window = new BrowserWindow()
+  launch(window)
+  watch(window)
 }
 
-async function launch(WINDOW: BrowserWindow) {
+async function launch(window: BrowserWindow) {
   await installExtension(REACT_DEVELOPER_TOOLS, { loadExtensionOptions: { allowFileAccess: true } })
-  await WINDOW.loadFile('./index.html')
-  WINDOW.webContents.openDevTools()
+  await window.loadFile('./browser/index.html')
+  window.webContents.openDevTools()
 }
 
-function watch(WINDOW: BrowserWindow) {
+function watch(window: BrowserWindow) {
   const { hotReloadWatcher } = getWorkerPaths()
   const worker = new Worker(hotReloadWatcher)
-  worker.on('message', () => WINDOW.reload())
+  worker.on('message', () => window.reload())
 }
