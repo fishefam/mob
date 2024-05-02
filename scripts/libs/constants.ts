@@ -47,5 +47,5 @@ export function getPkgNames() {
 }
 
 export function getElectronStaticFiles() {
-  return ['forge.config.js', 'package-lock.json', 'package.json'] as const
+  return ['forge.config.js', 'forge.config.cjs', 'forge.config.mjs', 'package-lock.json', 'package.json'] as const
 }

@@ -1,4 +1,4 @@
-import type { BuildOptions, BuildResult, Plugin } from 'esbuild'
+import type { BuildOptions, BuildResult, OnResolveArgs, OnResolveResult, Plugin } from 'esbuild'
 
 import { readdirSync } from 'fs'
 
@@ -22,6 +22,14 @@ export function createOnEndPlugin(name: string, callback: (result: BuildResult<B
 
 export function createOnStartPlugin(name: string, callback: () => void): Plugin {
   return { name, setup: (build) => build.onStart(callback) }
+}
+
+export function createOnResolvePlugin(
+  name: string,
+  filter: RegExp,
+  callback: (args: OnResolveArgs) => null | OnResolveResult | Promise<null | OnResolveResult>,
+): Plugin {
+  return { name, setup: (build) => build.onResolve({ filter }, callback) }
 }
 
 export function resolveRelative(...fragments: string[]) {

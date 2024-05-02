@@ -1,4 +1,4 @@
-import { getWorkerPaths } from '@libs/constants.node'
+import { getWorkerPaths } from '@libs/constants'
 import { app, BrowserWindow } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { Worker } from 'worker_threads'

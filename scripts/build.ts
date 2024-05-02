@@ -17,7 +17,9 @@ async function main() {
   const { assets, source, types } = getDirs()
   const entries = ['node', 'browser'].map((platform) => getOptionEntries(<Platform>platform))
   const contexts = await Promise.all(
-    entries.map((entry, index) => esbuild.context(getOptions({ cleanDisabled: index === 1, entry }))),
+    entries.map((entry, index) =>
+      esbuild.context(getOptions({ cleanDisabled: index === 1, entry, resolvePathDisabled: index === 1 })),
+    ),
   )
   const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
   await build(contexts)
@@ -45,14 +47,19 @@ async function build(contexts: BuildContext[]) {
   )
 }
 
-function getOptions(options: { cleanDisabled?: boolean; entry: BuildEntries }): BuildOptions {
+function getOptions(options: {
+  cleanDisabled?: boolean
+  entry: BuildEntries
+  resolvePathDisabled?: boolean
+}): BuildOptions {
   const { cleanDisabled, entry } = options
   const { electron } = getDirs()
   const { paths, platform } = entry
   return {
-    bundle: platform === 'browser',
+    bundle: true,
     entryPoints: paths,
-    format: 'iife',
+    external: ['electron'],
+    format: 'cjs',
     jsx: 'transform',
     legalComments: 'none',
     loader: { '.html': 'copy', '.json': 'copy' },
