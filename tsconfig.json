@@ -7,7 +7,7 @@
     "jsx": "react-jsx",
     "module": "commonjs",
     "paths": {
-      "@components/*": ["src/components/*"],
+      "@components/*": ["src/browser/components/*"],
       "@libs/*": ["src/libs/*"]
     },
     "skipLibCheck": true,

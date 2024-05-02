@@ -5,10 +5,8 @@ import { resolve } from 'path'
 
 export function getOptionEntries(platform: Platform): BuildEntries {
   const { electron, source } = getDirs()
-  const platforms: Platform[] = ['browser', 'node']
-  const extPattern = new RegExp('\\.(' + platforms.join('|') + ')\\..+')
   const buildFiles = readdirSync(source, { recursive: true, withFileTypes: true }).filter(({ name }) =>
-    extPattern.test(name),
+    /\.entry\./.test(name),
   )
   const getPlatformBuildFiles = (platform: Exclude<Platform, 'neutral'>) =>
     buildFiles
@@ -47,5 +45,7 @@ export function getPkgNames() {
 }
 
 export function getElectronStaticFiles() {
-  return ['forge.config.js', 'forge.config.cjs', 'forge.config.mjs', 'package-lock.json', 'package.json'] as const
+  const extensions = ['js', 'cjs', 'mjs'] as const
+  const forgeConfigFiles = extensions.map((ext) => 'forge.config.' + ext)
+  return [...forgeConfigFiles, 'package-lock.json', 'package.json'] as const
 }

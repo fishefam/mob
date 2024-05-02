@@ -3,24 +3,23 @@ import { app, BrowserWindow } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { Worker } from 'worker_threads'
 
-let { appWindow } = globalThis
+const WINDOW = new BrowserWindow()
 
 main()
 
 function main() {
-  app.on('ready', launch)
-  watch()
+  app.on('ready', () => launch(WINDOW))
+  watch(WINDOW)
 }
 
-async function launch() {
-  appWindow = new BrowserWindow()
+async function launch(WINDOW: BrowserWindow) {
   await installExtension(REACT_DEVELOPER_TOOLS, { loadExtensionOptions: { allowFileAccess: true } })
-  await appWindow.loadFile('./index.html')
-  appWindow.webContents.openDevTools()
+  await WINDOW.loadFile('./index.html')
+  WINDOW.webContents.openDevTools()
 }
 
-function watch() {
+function watch(WINDOW: BrowserWindow) {
   const { hotReloadWatcher } = getWorkerPaths()
   const worker = new Worker(hotReloadWatcher)
-  worker.on('message', () => appWindow.reload())
+  worker.on('message', () => WINDOW.reload())
 }

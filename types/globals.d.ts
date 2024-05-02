@@ -1,15 +1,27 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
-type EnvironmentVars<T extends Record<number | string, string>> = Partial<T>
-type EntryPoints = { [key in 'in' | 'out']: string }[]
-type BuildEntries = { paths: EntryPoints; platform: import('esbuild').Platform }
+type ArrayString = `[${string}]`
+type Platform = 'browser' | 'node'
+type BoolString = 'false' | 'true'
+type NodeVariables<T extends Record<number | string, string>> = Partial<T>
+type BuildEntries = { in: `${string}.entry.${string}`; out: string }[]
 
-declare var appWindow: import('electron').BrowserWindow
+type SetState<T> = import('react').Dispatch<import('react').SetStateAction<T>>
+
+declare var browserWindow: import('electron').BrowserWindow
 
 declare module NodeJS {
   interface ProcessEnv
-    extends EnvironmentVars<{
-      NODE_ENV: 'development' | 'production'
-    }> {}
+    extends NodeVariables<
+      {
+        DEV_URLS: ArrayString
+        ENV: 'development' | 'production'
+      } & { [key in 'PASSWORD' | 'USER']: string }
+    > {}
+}
+
+declare module esbuild {
+  const esbuild: import('esbuild')
+  export default esbuild
 }
