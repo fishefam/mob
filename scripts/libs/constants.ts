@@ -19,3 +19,10 @@ export function getDirs() {
     source: 'src',
   } as const
 }
+
+export function getPkgNames() {
+  return {
+    core: 'mob-core',
+    root: 'mob',
+  }
+}
