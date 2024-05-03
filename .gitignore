@@ -135,5 +135,5 @@ pnpm-lock.*
 yarn.lock
 
 # Outputs
-out
+dist
 .electron

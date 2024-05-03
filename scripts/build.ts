@@ -4,12 +4,22 @@ import type { BuildContext, BuildOptions, Message } from 'esbuild'
 import { spawn } from 'child_process'
 import chokidar from 'chokidar'
 import esbuild from 'esbuild'
-import { cpSync, writeFileSync } from 'fs'
-import { resolve } from 'path'
+import { writeFileSync } from 'fs'
+import { mkdirpSync } from 'mkdirp'
 
-import { getDirs, getOptionEntries, getPkgNames } from './libs/constants'
+import {
+  author,
+  dependencies,
+  description,
+  devDependencies,
+  main as jsonMain,
+  license,
+  name,
+  version,
+} from '../package.json'
+import { getDirs, getOptionEntries } from './libs/constants'
 import { clean, style } from './libs/plugins'
-import { hasDir, isProd, resolveRelative } from './libs/utils'
+import { isProd, resolveRelative } from './libs/utils'
 
 main()
 
@@ -19,27 +29,29 @@ async function main() {
     paths: getOptionEntries(<Platform>platform),
     platform: <Platform>platform,
   }))
+  const configEntries: typeof entries = [
+    {
+      paths: [{ in: <'.entry.'>'forge.config.ts', out: 'forge.config' }],
+      platform: 'node',
+    },
+  ]
   const contexts = await Promise.all(
-    entries.map(({ paths, platform }, index) =>
-      esbuild.context(getOptions({ cleanDisabled: index === 1, entry: paths, platform })),
-    ),
+    configEntries
+      .concat(entries)
+      .map(({ paths, platform }, index) =>
+        esbuild.context(
+          getOptions({ cleanDisabled: [1, 2].includes(index), entry: paths, isConfig: index === 0, platform }),
+        ),
+      ),
   )
   const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
+  applyPackageJSON()
   await build(contexts)
   if (isProd()) process.exit()
   watch(watcher, contexts)
 }
 
 async function build(contexts: BuildContext[]) {
-  // const { core } = getPkgNames()
-  // const { electron, nodeModules } = getDirs()
-  // const { length: lengthA } = readDirItems(resolve(electron, nodeModules)) ?? []
-  // const { length: lengthB } = readDirItems(resolve(nodeModules)) ?? []
-  // if (lengthA < lengthB - 1)
-  //   cpSync(resolve(nodeModules), resolve(electron, nodeModules), {
-  //     filter: (source) => !new RegExp(core).test(source),
-  //     recursive: true,
-  //   })
   await Promise.all(
     contexts.map((context) =>
       context.rebuild().catch((error) => {
@@ -50,17 +62,18 @@ async function build(contexts: BuildContext[]) {
   )
 }
 
-function getOptions(options: { cleanDisabled?: boolean; entry: BuildEntries; platform: Platform }): BuildOptions {
-  const { cleanDisabled, entry, platform } = options
+function getOptions(options: {
+  cleanDisabled?: boolean
+  entry: BuildEntries
+  isConfig?: boolean
+  platform: Platform
+}): BuildOptions {
+  const { cleanDisabled, entry, isConfig, platform } = options
   const { electron } = getDirs()
-  const configEntries: BuildEntries = [
-    { in: <'.entry.'>'.electronrc.json', out: 'package' },
-    { in: <'.entry.'>'forge.config.ts', out: 'forge.config' },
-  ]
   return {
-    bundle: true,
-    entryPoints: [...entry, ...(platform === 'node' ? configEntries : [])],
-    external: ['electron'],
+    bundle: !isConfig,
+    entryPoints: entry,
+    external: !isConfig ? ['electron'] : undefined,
     format: 'cjs',
     jsx: 'transform',
     legalComments: 'none',
@@ -83,17 +96,29 @@ function watch(watcher: FSWatcher, contexts: BuildContext[]) {
   watcher.on('all', () => build(contexts))
 }
 
-function config() {
-  const { electron, nodeModules } = getDirs()
-  const { core } = getPkgNames()
-  const configs = [
-    { config: packageJSON, file: 'package.json' },
-    { config: forgeConfig, file: 'forge.config.js' },
-  ]
-  for (const { config, file } of configs) writeFileSync(resolveRelative(electron, file), config, { encoding: 'utf-8' })
-  if (!hasDir(resolve(electron, nodeModules)))
-    cpSync(resolve(nodeModules), resolve(electron, nodeModules), {
-      filter: (source) => !new RegExp(core).test(source),
-      recursive: true,
-    })
+function applyPackageJSON() {
+  const { electron } = getDirs()
+  const devDeps = {
+    '@electron-forge/cli': devDependencies['@electron-forge/cli'],
+    '@electron-forge/maker-deb': devDependencies['@electron-forge/maker-deb'],
+    '@electron-forge/maker-rpm': devDependencies['@electron-forge/maker-rpm'],
+    '@electron-forge/maker-squirrel': devDependencies['@electron-forge/maker-squirrel'],
+    '@electron-forge/maker-zip': devDependencies['@electron-forge/maker-zip'],
+    '@electron-forge/plugin-auto-unpack-natives': devDependencies['@electron-forge/plugin-auto-unpack-natives'],
+    '@electron-forge/plugin-fuses': devDependencies['@electron-forge/plugin-fuses'],
+    '@electron/fuses': devDependencies['@electron/fuses'],
+    'electron': devDependencies['electron'],
+  }
+  const packageJSON = JSON.stringify({
+    author,
+    dependencies: { 'electron-squirrel-startup': dependencies['electron-squirrel-startup'] },
+    description,
+    devDependencies: devDeps,
+    license,
+    main: jsonMain,
+    name,
+    version,
+  })
+  mkdirpSync(electron)
+  writeFileSync(resolveRelative(electron, 'package.json'), packageJSON)
 }

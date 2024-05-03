@@ -10,6 +10,7 @@
       "@components/*": ["src/browser/components/*"],
       "@libs/*": ["src/libs/*"]
     },
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "es2016"

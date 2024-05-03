@@ -29,16 +29,9 @@ export function getDirs() {
     assets: 'public',
     electron: '.electron',
     nodeModules: 'node_modules',
-    out: 'out',
+    out: 'dist',
     source: 'src',
     types: 'types',
-  } as const
-}
-
-export function getPkgNames() {
-  return {
-    core: 'mob-core',
-    root: 'mob',
   } as const
 }
 

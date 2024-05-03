@@ -13,11 +13,8 @@ import { createOnEndPlugin, createOnStartPlugin } from './utils'
 export function clean(disabled = false) {
   return createOnStartPlugin('clean', () => {
     if (!disabled) {
-      const { electron } = getDirs()
-      const electronFiles = getElectronStaticFiles()
-      rimrafSync(electron, {
-        filter: (path) => ![...electronFiles, 'node_modules'].some((value) => new RegExp(value).test(path)),
-      })
+      const { electron, out } = getDirs()
+      rimrafSync([electron, out])
     }
   })
 }

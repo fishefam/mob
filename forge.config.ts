@@ -1,13 +1,14 @@
-import type { ForgeConfig } from '@electron-forge/shared-types'
+/* eslint-disable @typescript-eslint/consistent-type-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { FusesPlugin } = require('@electron-forge/plugin-fuses')
+const { FuseV1Options, FuseVersion } = require('@electron/fuses')
 
-import { FusesPlugin } from '@electron-forge/plugin-fuses'
-import { FuseV1Options, FuseVersion } from '@electron/fuses'
-
-const forgeConfig: ForgeConfig = {
+module.exports = {
   makers: [
     {
       config: {},
       name: '@electron-forge/maker-squirrel',
+      platforms: ['win32'],
     },
     {
       config: {},
@@ -23,6 +24,7 @@ const forgeConfig: ForgeConfig = {
       name: '@electron-forge/maker-rpm',
     },
   ],
+  outDir: '../dist',
   packagerConfig: {
     asar: true,
   },
@@ -42,6 +44,4 @@ const forgeConfig: ForgeConfig = {
     }),
   ],
   rebuildConfig: {},
-}
-
-export default forgeConfig
+} satisfies import('@electron-forge/shared-types').ForgeConfig
