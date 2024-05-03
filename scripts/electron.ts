@@ -32,5 +32,6 @@ async function main() {
 
 function createCmd() {
   const { ELECTRON_CMD } = process.env
-  return `electron-forge ${ELECTRON_CMD} .electron`
+  const { electron } = getDirs()
+  return `electron-forge ${ELECTRON_CMD} ${electron}`
 }
