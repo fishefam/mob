@@ -4,6 +4,12 @@ import { readdirSync } from 'fs'
 
 import { getBgColors, getFgColors, getUtilColors } from './constants'
 
+type ColorizeInput = {
+  bg?: keyof ReturnType<typeof getBgColors>
+  color?: keyof ReturnType<typeof getFgColors>
+  text: string
+}
+
 export function hasDir(path: string) {
   let result = true
   try {
@@ -53,23 +59,21 @@ export function print(...values: unknown[]) {
   console.log(...values)
 }
 
-type ColorizeInput = {
-  bg?: keyof ReturnType<typeof getBgColors>
-  color?: keyof ReturnType<typeof getFgColors>
-  text: string
-}
 export function colorize<T extends string | unknown[] = string>(...inputs: ColorizeInput[]) {
   const bgColors = getBgColors()
   const colors = getFgColors()
   const { reset } = getUtilColors()
-  const result =
-    inputs instanceof Array
-      ? (<ColorizeInput[]>inputs).map(
-          ({ bg, color, text }) => (color ? colors[color] : '') + (bg ? bgColors[bg] : '') + text + reset,
-        )
-      : ((<ColorizeInput>inputs).color ? colors[(<ColorizeInput>inputs).color!] : '') +
-        ((<ColorizeInput>inputs).bg ? bgColors[(<ColorizeInput>inputs).bg!] : '') +
-        (<ColorizeInput>inputs).text +
-        reset
-  return <T extends string ? string : string[]>result
+  const result = inputs.map(
+    ({ bg, color, text }) => (color ? colors[color] : '') + (bg ? bgColors[bg] : '') + text + reset,
+  )
+  return <T extends string ? string : string[]>(inputs.length > 1 ? result : result[0])
+}
+
+export function getCurrentTime() {
+  const hrTime = process.hrtime()
+  return (hrTime[0] * 1000 + hrTime[1] / 1000000) / 1000
+}
+
+export function toTitleCase(value: string) {
+  return value.slice(0, 1).toUpperCase().concat(value.slice(1).toLocaleLowerCase())
 }

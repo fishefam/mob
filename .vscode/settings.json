@@ -2,6 +2,7 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
+  "git.ignoreLimitWarning": true,
   "javascript.suggestionActions.enabled": false,
   "typescript.suggestionActions.enabled": false,
   "typescript.tsdk": "node_modules\\typescript\\lib"

@@ -14,7 +14,11 @@ export function clean(disabled = false) {
   return createOnStartPlugin('clean', () => {
     if (!disabled) {
       const { electron, out } = getDirs()
-      rimrafSync([electron, out])
+      try {
+        rimrafSync([electron, out])
+      } catch {
+        /* empty */
+      }
     }
   })
 }

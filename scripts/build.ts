@@ -20,31 +20,16 @@ import {
 } from '../package.json'
 import { getDirs, getOptionEntries } from './libs/constants'
 import { clean, style } from './libs/plugins'
-import { isProd } from './libs/utils'
+import { colorize, getCurrentTime, hasDir, isProd, print } from './libs/utils'
+
+if (!process.env.ELECTRON_CMD) main()
 
 export async function main() {
   const { ELECTRON_CMD } = process.env
   const { assets, source, types } = getDirs()
-  const entries = ['node', 'browser'].map((platform) => ({
-    paths: getOptionEntries(<Platform>platform),
-    platform: <Platform>platform,
-  }))
-  const configEntries: typeof entries = [
-    {
-      paths: [{ in: <'.entry.'>'forge.config.ts', out: 'forge.config' }],
-      platform: 'node',
-    },
-  ]
-  const contexts = await Promise.all(
-    configEntries
-      .concat(entries)
-      .map(({ paths, platform }, index) =>
-        esbuild.context(
-          getOptions({ cleanDisabled: [1, 2].includes(index), entry: paths, isConfig: index === 0, platform }),
-        ),
-      ),
-  )
   const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
+  const contexts = await getContexts()
+  print(colorize({ bg: 'magenta', text: '[Build]' }), 'Building...')
   await build(contexts)
   applyPackageJSON()
   if (isProd() && ELECTRON_CMD) return
@@ -53,14 +38,27 @@ export async function main() {
 }
 
 async function build(contexts: BuildContext[]) {
+  const startTime = getCurrentTime()
+  await Promise.all(contexts.map((context) => context.cancel()))
   await Promise.all(
     contexts.map((context) =>
       context.rebuild().catch((error) => {
         const { errors } = <{ [key in 'errors' | 'warnings']: Message[] }>error
-        console.log(errors)
+        errors.forEach(({ location, pluginName, text }, index) => {
+          if (!/The build was canceled/.test(text)) {
+            if (index > 0) print()
+            const printError = (...message: unknown[]) =>
+              print(colorize({ bg: 'red', text: `[Error${index + 1}]` }), ...message)
+            printError(text)
+            if (pluginName.length) printError(pluginName)
+            if (location) printError(location.file, `{ line: ${location.line}, column: ${location.column} }`)
+          }
+        })
       }),
     ),
   )
+  const endTime = getCurrentTime()
+  print(colorize({ bg: 'magenta', text: '[Build]' }), 'Complete in:', `${(endTime - startTime).toFixed(2)}s`)
 }
 
 function getOptions(options: {
@@ -91,10 +89,24 @@ function getOptions(options: {
 }
 
 function watch(watcher: FSWatcher, contexts: BuildContext[]) {
-  const cp = spawn('npm run start', { shell: true })
-  cp.stdout.setEncoding('utf-8')
-  cp.stdout.on('data', (data) => console.log(data.trim()))
-  watcher.on('all', () => build(contexts))
+  const { electron } = getDirs()
+  if (hasDir(electron)) {
+    const cp = spawn(`electron-forge start ${electron}`, { shell: true })
+    cp.stdout.setEncoding('utf-8')
+    cp.stdout.on('data', (data) => print(data.trim()))
+    const printWatcher = (...messages: unknown[]) => print(...colorize({ bg: 'magenta', text: '[Watch]' }), ...messages)
+    watcher
+      .on('add', (path) => printWatcher(`File ${path} has been added`))
+      .on('addDir', (path) => printWatcher(`Directory ${path} has been added`))
+      .on('change', (path) => printWatcher(`File ${path} has been changed`))
+      .on('unlink', (path) => printWatcher(`File ${path} has been removed`))
+      .on('unlinkDir', (path) => printWatcher(`Directory ${path} has been removed`))
+      .on('error', (error) => printWatcher(`Watcher error: ${error}`))
+      .on('all', () => {
+        print(colorize({ bg: 'magenta', text: '[Watch]' }), 'Rebuilding...')
+        build(contexts)
+      })
+  }
 }
 
 function applyPackageJSON() {
@@ -122,4 +134,27 @@ function applyPackageJSON() {
   })
   mkdirpSync(electron)
   writeFileSync(resolve(electron, 'package.json'), packageJSON, { encoding: 'utf-8', flag: 'w' })
+}
+
+async function getContexts() {
+  const entries = ['node', 'browser'].map((platform) => ({
+    paths: getOptionEntries(<Platform>platform),
+    platform: <Platform>platform,
+  }))
+  const configEntries: typeof entries = [
+    {
+      paths: [{ in: <'.entry.'>'forge.config.ts', out: 'forge.config' }],
+      platform: 'node',
+    },
+  ]
+  const contexts = await Promise.all(
+    configEntries
+      .concat(entries)
+      .map(({ paths, platform }, index) =>
+        esbuild.context(
+          getOptions({ cleanDisabled: [1, 2].includes(index), entry: paths, isConfig: index === 0, platform }),
+        ),
+      ),
+  )
+  return contexts
 }
