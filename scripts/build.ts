@@ -4,12 +4,12 @@ import type { BuildContext, BuildOptions, Message } from 'esbuild'
 import { spawn } from 'child_process'
 import chokidar from 'chokidar'
 import esbuild from 'esbuild'
-import { cpSync } from 'fs'
+import { cpSync, writeFileSync } from 'fs'
 import { resolve } from 'path'
 
 import { getDirs, getOptionEntries, getPkgNames } from './libs/constants'
 import { clean, style } from './libs/plugins'
-import { isProd, readDirItems } from './libs/utils'
+import { hasDir, isProd, resolveRelative } from './libs/utils'
 
 main()
 
@@ -31,15 +31,15 @@ async function main() {
 }
 
 async function build(contexts: BuildContext[]) {
-  const { core } = getPkgNames()
-  const { electron, nodeModules } = getDirs()
-  const { length: lengthA } = readDirItems(resolve(electron, nodeModules)) ?? []
-  const { length: lengthB } = readDirItems(resolve(nodeModules)) ?? []
-  if (lengthA < lengthB - 1)
-    cpSync(resolve(nodeModules), resolve(electron, nodeModules), {
-      filter: (source) => !new RegExp(core).test(source),
-      recursive: true,
-    })
+  // const { core } = getPkgNames()
+  // const { electron, nodeModules } = getDirs()
+  // const { length: lengthA } = readDirItems(resolve(electron, nodeModules)) ?? []
+  // const { length: lengthB } = readDirItems(resolve(nodeModules)) ?? []
+  // if (lengthA < lengthB - 1)
+  //   cpSync(resolve(nodeModules), resolve(electron, nodeModules), {
+  //     filter: (source) => !new RegExp(core).test(source),
+  //     recursive: true,
+  //   })
   await Promise.all(
     contexts.map((context) =>
       context.rebuild().catch((error) => {
@@ -53,9 +53,13 @@ async function build(contexts: BuildContext[]) {
 function getOptions(options: { cleanDisabled?: boolean; entry: BuildEntries; platform: Platform }): BuildOptions {
   const { cleanDisabled, entry, platform } = options
   const { electron } = getDirs()
+  const configEntries: BuildEntries = [
+    { in: <'.entry.'>'.electronrc.json', out: 'package' },
+    { in: <'.entry.'>'forge.config.ts', out: 'forge.config' },
+  ]
   return {
     bundle: true,
-    entryPoints: entry,
+    entryPoints: [...entry, ...(platform === 'node' ? configEntries : [])],
     external: ['electron'],
     format: 'cjs',
     jsx: 'transform',
@@ -77,4 +81,19 @@ function watch(watcher: FSWatcher, contexts: BuildContext[]) {
   cp.stdout.setEncoding('utf-8')
   cp.stdout.on('data', (data) => console.log(data.trim()))
   watcher.on('all', () => build(contexts))
+}
+
+function config() {
+  const { electron, nodeModules } = getDirs()
+  const { core } = getPkgNames()
+  const configs = [
+    { config: packageJSON, file: 'package.json' },
+    { config: forgeConfig, file: 'forge.config.js' },
+  ]
+  for (const { config, file } of configs) writeFileSync(resolveRelative(electron, file), config, { encoding: 'utf-8' })
+  if (!hasDir(resolve(electron, nodeModules)))
+    cpSync(resolve(nodeModules), resolve(electron, nodeModules), {
+      filter: (source) => !new RegExp(core).test(source),
+      recursive: true,
+    })
 }

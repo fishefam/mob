@@ -136,7 +136,4 @@ yarn.lock
 
 # Outputs
 out
-.electron/*
-!.electron/forge.config.*
-!.electron/package-lock.json
-!.electron/package.json
+.electron

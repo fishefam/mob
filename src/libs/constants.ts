@@ -1,5 +1,7 @@
+import { resolve } from 'path'
+
 export function getWorkerPaths() {
   return {
-    hotReloadWatcher: './node/workers/hot-reload-watcher.js',
+    hotReloadWatcher: resolve('./resources/app/node/workers/hot-reload-watcher.js'),
   } as const
 }

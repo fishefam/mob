@@ -2,6 +2,16 @@ import type { BuildOptions, BuildResult, OnResolveArgs, OnResolveResult, Plugin 
 
 import { readdirSync } from 'fs'
 
+export function hasDir(path: string) {
+  let result = true
+  try {
+    readdirSync(path)
+  } catch {
+    result = false
+  }
+  return result
+}
+
 export function isProd() {
   return process.env.NODE_ENV === 'production'
 }

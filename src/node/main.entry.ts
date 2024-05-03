@@ -2,7 +2,10 @@ import { getWorkerPaths } from '@libs/constants'
 import { BrowserWindow } from 'electron'
 import { app } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
+import { resolve } from 'path'
 import { Worker } from 'worker_threads'
+
+console.log(resolve(''))
 
 main()
 
