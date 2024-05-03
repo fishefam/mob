@@ -34,6 +34,7 @@ export async function main() {
   applyPackageJSON()
   if (isProd() && ELECTRON_CMD) return
   if (isProd() && !ELECTRON_CMD) process.exit()
+  print(colorize({ bg: 'magenta', text: '[Electron]' }), `Starting Electron app...`)
   watch(watcher, contexts)
 }
 
@@ -93,8 +94,9 @@ function watch(watcher: FSWatcher, contexts: BuildContext[]) {
   if (hasDir(electron)) {
     const cp = spawn(`electron-forge start ${electron}`, { shell: true })
     cp.stdout.setEncoding('utf-8')
+    cp.stdout.on('close', () => process.exit())
     cp.stdout.on('data', (data) => print(data.trim()))
-    const printWatcher = (...messages: unknown[]) => print(...colorize({ bg: 'magenta', text: '[Watch]' }), ...messages)
+    const printWatcher = (...messages: unknown[]) => print(...messages)
     watcher
       .on('add', (path) => printWatcher(`File ${path} has been added`))
       .on('addDir', (path) => printWatcher(`Directory ${path} has been added`))

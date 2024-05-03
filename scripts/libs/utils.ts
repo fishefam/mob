@@ -4,12 +4,6 @@ import { readdirSync, writeFileSync } from 'fs'
 
 import { getBgColors, getDirs, getFgColors, getUtilColors } from './constants'
 
-type ColorizeInput = {
-  bg?: keyof ReturnType<typeof getBgColors>
-  color?: keyof ReturnType<typeof getFgColors>
-  text: string
-}
-
 export function hasDir(path: string) {
   let result = true
   try {

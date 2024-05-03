@@ -6,7 +6,7 @@ import micromatch from 'micromatch'
 const config: import('lint-staged').ConfigFn = async (files) => {
   const tsFiles = match(files, 'ts', 'tsx')
   const assortedFiles = match(files, 'html', 'css', 'json')
-  const typecheck = createCommand('tsc')
+  const typecheck = createCommand('tsc', '..')
   const eslint = createCommand('eslint', '--fix $0', tsFiles.join(' '))
   const prettier = createCommand('prettier', '--write $0', [...assortedFiles, ...tsFiles].join(' '))
   return [applyCommand(typecheck, []), applyCommand(prettier, assortedFiles), applyCommand(eslint, tsFiles)].flat()

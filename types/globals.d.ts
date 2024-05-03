@@ -6,6 +6,11 @@ type Platform = 'browser' | 'node'
 type BoolString = 'false' | 'true'
 type NodeVariables<T extends Record<number | string, string>> = Partial<T>
 type BuildEntries = { in: `${string}.entry.${string}`; out: string }[]
+type ColorizeInput = {
+  bg?: keyof ReturnType<typeof getBgColors>
+  color?: keyof ReturnType<typeof getFgColors>
+  text: string
+}
 
 type SetState<T> = import('react').Dispatch<import('react').SetStateAction<T>>
 
