@@ -1,8 +1,8 @@
 import type { BuildOptions, BuildResult, OnResolveArgs, OnResolveResult, Plugin } from 'esbuild'
 
-import { readdirSync } from 'fs'
+import { readdirSync, writeFileSync } from 'fs'
 
-import { getBgColors, getFgColors, getUtilColors } from './constants'
+import { getBgColors, getDirs, getFgColors, getUtilColors } from './constants'
 
 type ColorizeInput = {
   bg?: keyof ReturnType<typeof getBgColors>
@@ -77,3 +77,12 @@ export function getCurrentTime() {
 export function toTitleCase(value: string) {
   return value.slice(0, 1).toUpperCase().concat(value.slice(1).toLocaleLowerCase())
 }
+
+export function getBinCmds(cmd?: BinCmds) {
+  const { nodeModules, types } = getDirs()
+  const files = readdirSync(resolveRelative(nodeModules, '.bin')).filter((file) => !/\..*$/.test(file))
+  writeFileSync(resolveRelative(types, 'bin.d.ts'), `type BinCmds = { ${files.map((file) => `'${file}'`).join(', ')} }`)
+  if (cmd) return <{ [key in keyof BinCmds]: string }>Object.fromEntries(files.map((file) => [file, file]))
+}
+
+getBinCmds()
