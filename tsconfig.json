@@ -6,6 +6,7 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "module": "commonjs",
+    "noEmit": true,
     "paths": {
       "@components/*": ["src/browser/components/*"],
       "@libs/*": ["src/libs/*"]
