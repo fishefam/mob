@@ -2,6 +2,8 @@ import type { BuildOptions, BuildResult, OnResolveArgs, OnResolveResult, Plugin 
 
 import { readdirSync } from 'fs'
 
+import { getBgColors, getFgColors, getUtilColors } from './constants'
+
 export function hasDir(path: string) {
   let result = true
   try {
@@ -45,4 +47,29 @@ export function createOnResolvePlugin(
 export function resolveRelative(...fragments: string[]) {
   const cleanFragments = fragments.map((value) => value.replace(/^(\/|\\)/, ''))
   return cleanFragments.join('/')
+}
+
+export function print(...values: unknown[]) {
+  console.log(...values)
+}
+
+type ColorizeInput = {
+  bg?: keyof ReturnType<typeof getBgColors>
+  color?: keyof ReturnType<typeof getFgColors>
+  text: string
+}
+export function colorize<T extends string | unknown[] = string>(...inputs: ColorizeInput[]) {
+  const bgColors = getBgColors()
+  const colors = getFgColors()
+  const { reset } = getUtilColors()
+  const result =
+    inputs instanceof Array
+      ? (<ColorizeInput[]>inputs).map(
+          ({ bg, color, text }) => (color ? colors[color] : '') + (bg ? bgColors[bg] : '') + text + reset,
+        )
+      : ((<ColorizeInput>inputs).color ? colors[(<ColorizeInput>inputs).color!] : '') +
+        ((<ColorizeInput>inputs).bg ? bgColors[(<ColorizeInput>inputs).bg!] : '') +
+        (<ColorizeInput>inputs).text +
+        reset
+  return <T extends string ? string : string[]>result
 }

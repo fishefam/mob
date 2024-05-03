@@ -16,6 +16,7 @@ declare module NodeJS {
     extends NodeVariables<
       {
         DEV_URLS: ArrayString
+        ELECTRON_CMD: 'make' | 'package' | 'start'
         ENV: 'development' | 'production'
       } & { [key in 'PASSWORD' | 'USER']: string }
     > {}

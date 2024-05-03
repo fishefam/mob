@@ -6,6 +6,7 @@ import chokidar from 'chokidar'
 import esbuild from 'esbuild'
 import { writeFileSync } from 'fs'
 import { mkdirpSync } from 'mkdirp'
+import { resolve } from 'path'
 
 import {
   author,
@@ -19,11 +20,10 @@ import {
 } from '../package.json'
 import { getDirs, getOptionEntries } from './libs/constants'
 import { clean, style } from './libs/plugins'
-import { isProd, resolveRelative } from './libs/utils'
+import { isProd } from './libs/utils'
 
-main()
-
-async function main() {
+export async function main() {
+  const { ELECTRON_CMD } = process.env
   const { assets, source, types } = getDirs()
   const entries = ['node', 'browser'].map((platform) => ({
     paths: getOptionEntries(<Platform>platform),
@@ -45,9 +45,10 @@ async function main() {
       ),
   )
   const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
-  applyPackageJSON()
   await build(contexts)
-  if (isProd()) process.exit()
+  applyPackageJSON()
+  if (isProd() && ELECTRON_CMD) return
+  if (isProd() && !ELECTRON_CMD) process.exit()
   watch(watcher, contexts)
 }
 
@@ -120,5 +121,5 @@ function applyPackageJSON() {
     version,
   })
   mkdirpSync(electron)
-  writeFileSync(resolveRelative(electron, 'package.json'), packageJSON)
+  writeFileSync(resolve(electron, 'package.json'), packageJSON, { encoding: 'utf-8', flag: 'w' })
 }
