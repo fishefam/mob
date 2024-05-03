@@ -1,6 +1,15 @@
+import { readdirSync } from 'fs'
 import { resolve } from 'path'
 
+import { resolveRelative, snakeToCamel } from './utils'
+
 export function getWorkerPaths() {
+  const { browser, node, source, workers } = getDirs()
+  const workerDirs = [browser, node].map((env) => resolveRelative(env, workers))
+  const groupedWorkerPaths = workerDirs.map((dir) =>
+    Object.fromEntries(readdirSync(dir).map((file) => [snakeToCamel(file), file])),
+  )
+  console.log('dirs', workerDirs)
   return {
     hotReloadWatcher: resolve('./node/workers/hot-reload-watcher.js'),
   } as const
@@ -40,5 +49,19 @@ export function getFgColors() {
     red: '\x1b[31m',
     white: '\x1b[37m',
     yellow: '\x1b[33m',
+  } as const
+}
+
+export function getDirs() {
+  return {
+    assets: 'public',
+    browser: 'browser',
+    electron: '.electron',
+    node: 'node',
+    nodeModules: 'node_modules',
+    out: 'dist',
+    source: 'src',
+    types: 'types',
+    workers: 'workers',
   } as const
 }

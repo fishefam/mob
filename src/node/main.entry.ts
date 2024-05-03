@@ -5,6 +5,7 @@ import { app } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { Worker } from 'worker_threads'
 
+getWorkerPaths()
 main()
 
 async function main() {

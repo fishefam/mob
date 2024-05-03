@@ -1,0 +1,1 @@
+type WorkerPaths = { placeholder: string }
