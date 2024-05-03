@@ -25,17 +25,22 @@ import { colorize, getCurrentTime, hasDir, isProd, print } from './libs/utils'
 if (!process.env.ELECTRON_CMD) main()
 
 export async function main() {
-  const { ELECTRON_CMD } = process.env
-  const { assets, source, types } = getDirs()
-  const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
-  const contexts = await getContexts()
-  print(colorize({ bg: 'magenta', text: '[Build]' }), 'Building...')
-  await build(contexts)
-  applyPackageJSON()
-  if (isProd() && ELECTRON_CMD) return
-  if (isProd() && !ELECTRON_CMD) process.exit()
-  print(colorize({ bg: 'magenta', text: '[Electron]' }), `Starting Electron app...`)
-  watch(watcher, contexts)
+  const [nodeVersion] = process.version.split('.').map((value) => value.replace(/v/g, ''))
+  if (parseInt(nodeVersion) < 21)
+    print(colorize({ bg: 'red', text: '[Error]' }), `Node ${process.version} is not allowed. Require a version >= v21.`)
+  if (parseInt(nodeVersion) >= 21) {
+    const { ELECTRON_CMD } = process.env
+    const { assets, source, types } = getDirs()
+    const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })
+    const contexts = await getContexts()
+    print(colorize({ bg: 'magenta', text: '[Build]' }), 'Building...')
+    await build(contexts)
+    applyPackageJSON()
+    if (isProd() && ELECTRON_CMD) return
+    if (isProd() && !ELECTRON_CMD) process.exit()
+    print(colorize({ bg: 'magenta', text: '[Electron]' }), `Starting Electron app...`)
+    watch(watcher, contexts)
+  }
 }
 
 async function build(contexts: BuildContext[]) {
