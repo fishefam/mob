@@ -78,11 +78,11 @@ export function toTitleCase(value: string) {
   return value.slice(0, 1).toUpperCase().concat(value.slice(1).toLocaleLowerCase())
 }
 
-export function getBinCmds(cmd?: BinCmds) {
+export function getBinCmds<T extends keyof BinCmds | true>(cmd?: T) {
   const { nodeModules, types } = getDirs()
   const files = readdirSync(resolveRelative(nodeModules, '.bin')).filter((file) => !/\..*$/.test(file))
   writeFileSync(resolveRelative(types, 'bin.d.ts'), `type BinCmds = { ${files.map((file) => `'${file}'`).join(', ')} }`)
-  if (cmd) return <{ [key in keyof BinCmds]: string }>Object.fromEntries(files.map((file) => [file, file]))
+  const cmds = <{ [key in keyof BinCmds]: string }>Object.fromEntries(files.map((file) => [file, file]))
+  if (cmd) return <T extends true ? BinCmds : string>cmds[<keyof BinCmds>cmd]
+  return <T extends true ? BinCmds : string>cmds
 }
-
-getBinCmds()

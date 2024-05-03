@@ -7,20 +7,15 @@ import { resolve } from 'path'
 
 import { compilerOptions } from '../tsconfig.json'
 import { getDirs } from './libs/constants'
-import { getBinCmds } from './libs/utils'
 
 const config: import('lint-staged').ConfigFn = async (files) => {
   const { nodeModules } = getDirs()
   const tsFiles = match(files, 'ts', 'tsx')
   const assortedFiles = match(files, 'html', 'css', 'json')
-  try {
-    generateTsconfig(tsFiles)
-  } catch (error) {
-    console.log(error)
-  }
-  const typecheck = createCommand(`tsc --project ${resolve(nodeModules, 'tsconfig.json')}`)
-  const eslint = createCommand('eslint $0 --fix', tsFiles.join(' '))
-  const prettier = createCommand('prettier $0 --write', [...assortedFiles, ...tsFiles].join(' '))
+  generateTsconfig(tsFiles)
+  const typecheck = createCommand('tsc', `--project ${resolve(nodeModules, 'tsconfig.json')}`)
+  const eslint = createCommand('eslint', '--fix $0', tsFiles.join(' '))
+  const prettier = createCommand('prettier', '--write $0', [...assortedFiles, ...tsFiles].join(' '))
   return [applyCommand(typecheck, tsFiles), applyCommand(prettier, assortedFiles), applyCommand(eslint, tsFiles)].flat()
 }
 
@@ -33,12 +28,11 @@ function generateTsconfig(files: string[]) {
   const configs = JSON.stringify({
     compilerOptions: {
       ...compilerOptions,
-      baseUrl: resolve('..'),
-      files,
+      baseUrl: resolve('.'),
     },
+    files,
   })
-  const dest = resolve(nodeModules, 'tsconfig.json')
-  writeFileSync(dest, configs)
+  writeFileSync(resolve(nodeModules, 'tsconfig.json'), configs)
 }
 
 function match(files: string[], ...extensions: string[]) {
@@ -48,10 +42,9 @@ function match(files: string[], ...extensions: string[]) {
   )
 }
 
-function createCommand(cmd: string, ...interpolates: string[]) {
-  console.log(getBinCmds())
+function createCommand(binCmd: keyof BinCmds, args?: string, ...interpolates: string[]) {
   const prefix = 'node_modules/.bin/'
-  let command = prefix + cmd
+  let command = prefix + binCmd + ' ' + args
   for (let i = 0; i < interpolates.length; i++) command = command.replace(new RegExp(`\\$\{?${i}}?`), interpolates[i])
   return command
 }

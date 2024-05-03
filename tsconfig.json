@@ -13,6 +13,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "es2016"
+    "target": "es2016",
+    "types": ["node"]
   }
 }
