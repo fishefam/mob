@@ -58,7 +58,11 @@ export function colorize<T extends string | unknown[] = string>(...inputs: Color
   const colors = getFgColors()
   const { reset } = getUtilColors()
   const result = inputs.map(
-    ({ bg, color, text }) => (color ? colors[color] : '') + (bg ? bgColors[bg] : '') + text + reset,
+    ({ bg, color, text }) =>
+      (color ? colors[<keyof typeof colors>color] : '') +
+      (bg ? bgColors[<keyof typeof bgColors>bg] : '') +
+      text +
+      reset,
   )
   return <T extends string ? string : string[]>(inputs.length > 1 ? result : result[0])
 }

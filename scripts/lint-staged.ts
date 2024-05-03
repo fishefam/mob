@@ -6,10 +6,10 @@ import micromatch from 'micromatch'
 const config: import('lint-staged').ConfigFn = async (files) => {
   const tsFiles = match(files, 'ts', 'tsx')
   const assortedFiles = match(files, 'html', 'css', 'json')
-  const typecheck = createCommand('tsc', '..')
+  const typecheck = createCommand('tsc')
   const eslint = createCommand('eslint', '--fix $0', tsFiles.join(' '))
   const prettier = createCommand('prettier', '--write $0', [...assortedFiles, ...tsFiles].join(' '))
-  return [applyCommand(typecheck, []), applyCommand(prettier, assortedFiles), applyCommand(eslint, tsFiles)].flat()
+  return [applyCommand(typecheck, tsFiles), applyCommand(prettier, assortedFiles), applyCommand(eslint, tsFiles)].flat()
 }
 
 function applyCommand(cmd: string, files: string[]) {
@@ -25,7 +25,7 @@ function match(files: string[], ...extensions: string[]) {
 
 function createCommand(binCmd: keyof BinCmds, args?: string, ...interpolates: string[]) {
   const prefix = 'node_modules/.bin/'
-  let command = prefix + binCmd + ' ' + args
+  let command = prefix + binCmd + (args ? ' ' + args : '')
   for (let i = 0; i < interpolates.length; i++) command = command.replace(new RegExp(`\\$\{?${i}}?`), interpolates[i])
   return command
 }
