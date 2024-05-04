@@ -1,4 +1,3 @@
-import { spawnSync } from 'child_process'
 import { buildSync } from 'esbuild'
 import { resolve } from 'path'
 
@@ -18,6 +17,4 @@ function main() {
     outdir: nodeModules,
     platform: 'node',
   })
-  console.log(lintStaged.out)
-  spawnSync(`${lintStaged.cmd} --config ${lintStaged.out}.js`)
 }
