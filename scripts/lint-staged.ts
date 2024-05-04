@@ -2,11 +2,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { generateBinCmdsDTS } from '@script-libs/utils'
-import { spawnSync } from 'child_process'
 import micromatch from 'micromatch'
 
 generateBinCmdsDTS()
-spawnSync('git add *bin.d.ts', { shell: true })
 
 const config: import('lint-staged').ConfigFn = async (files) => {
   const tsFiles = match(files, 'ts', 'tsx')
@@ -35,4 +33,4 @@ function createCommand(binCmd: BinCmds, args?: string, ...interpolates: string[]
   return command
 }
 
-module.exports = config
+export default config
