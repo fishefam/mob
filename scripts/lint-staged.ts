@@ -3,10 +3,6 @@
 
 import micromatch from 'micromatch'
 
-import { generateBinCmds } from './libs/utils'
-
-generateBinCmds()
-
 const config: import('lint-staged').ConfigFn = async (files) => {
   const tsFiles = match(files, 'ts', 'tsx')
   const assortedFiles = match(files, 'html', 'css', 'json')

@@ -49,6 +49,5 @@ type BinCmds =
   | 'tsc'
   | 'tsserver'
   | 'update-browserslist-db'
-  | 'yaml'
   | 'yarn-or-npm'
   | 'yon'
