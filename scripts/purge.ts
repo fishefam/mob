@@ -20,7 +20,7 @@ function main() {
   print(colorize({ bg: 'blue', text: '[INFO]' }), 'Purging complete')
   print(
     colorize({ bg: 'blue', text: '[INFO]' }),
-    'Eslint WILL complain on most files after purging due to the missing of node_modules',
+    'Typescript and Eslint WILL complain on most files after purging due to the missing of node_modules',
   )
   print(
     colorize({ bg: 'blue', text: '[INFO]' }),
