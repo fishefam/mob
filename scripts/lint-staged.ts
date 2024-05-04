@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+import { spawnSync } from 'child_process'
 import micromatch from 'micromatch'
+
+import { generateBinCmds } from './libs/utils'
+
+generateBinCmds()
+spawnSync('git add *bin.d.ts', { shell: true })
 
 const config: import('lint-staged').ConfigFn = async (files) => {
   const tsFiles = match(files, 'ts', 'tsx')
