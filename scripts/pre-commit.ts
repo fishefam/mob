@@ -18,5 +18,6 @@ function main() {
     outdir: nodeModules,
     platform: 'node',
   })
+  console.log('built lingtsaeg')
   spawnSync(`${lintStaged.cmd} --config ${lintStaged.out}`)
 }
