@@ -25,10 +25,10 @@ import { colorize, generateWorkerDTS, getCurrentTime, hasDir, isProd, print } fr
 if (!process.env.ELECTRON_CMD) main()
 
 export async function main() {
-  const [nodeVersion] = process.version.split('.').map((value) => value.replace(/v/g, ''))
-  if (parseInt(nodeVersion) < 21)
-    print(colorize({ bg: 'red', text: '[Error]' }), `Node ${process.version} is not allowed. Require a version >= v21.`)
-  if (parseInt(nodeVersion) >= 21) {
+  const isValidNodeVersion = process.version === 'v20.11.1'
+  if (!isValidNodeVersion)
+    print(colorize({ bg: 'red', text: '[Error]' }), `Node ${process.version} is not allowed. Require version v20.11.1`)
+  if (isValidNodeVersion) {
     const { ELECTRON_CMD } = process.env
     const { assets, source, types } = getDirs()
     const watcher = chokidar.watch([source, assets, types], { ignoreInitial: true })

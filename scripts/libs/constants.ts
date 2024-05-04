@@ -8,7 +8,7 @@ export function getOptionEntries(platform: Platform): BuildEntries {
   const workerRegex = /workers/
   const { electron, source } = getDirs()
   const buildFiles = readdirSync(source, { recursive: true, withFileTypes: true }).filter(
-    ({ name, path }) => flagRegex.test(name) || workerRegex.test(path),
+    (item) => item.isFile() && (flagRegex.test(item.name) || workerRegex.test(item.path)),
   )
   const platforms: Platform[] = ['node', 'browser']
   const [nodeFiles, browserFiles] = platforms.map((platform) =>

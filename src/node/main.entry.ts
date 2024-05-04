@@ -23,6 +23,8 @@ async function launch(window: BrowserWindow) {
 
 function watch(window: BrowserWindow) {
   const { node } = getWorkerPaths()
-  const worker = new Worker(node.intervalMessage)
+  window.webContents.executeJavaScript(`console.log(${JSON.stringify(node)})`)
+  const worker = new Worker('D:\\Code\\Javascript\\mob\\.electron\\node\\workers\\some\\interval-message.js')
+  window.webContents.executeJavaScript(`console.log(${JSON.stringify(worker)})`)
   worker.on('message', (message) => window.webContents.executeJavaScript(`console.log(${JSON.stringify(message)})`))
 }
