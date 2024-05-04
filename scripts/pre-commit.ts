@@ -12,7 +12,7 @@ function main() {
   const lintStaged = { cmd: <BinCmds>'lint-staged', out: resolve(nodeModules, <BinCmds>'lint-staged' + '.config') }
   buildSync({
     bundle: true,
-    entryPoints: [{ in: resolveRelative(scripts, 'lint-staged.ts'), out: lintStaged.out }],
+    entryPoints: [{ in: resolveRelative(scripts, 'lint-staged.ts'), out: 'lint-staged.config' }],
     external: ['micromatch'],
     format: 'cjs',
     outdir: nodeModules,
