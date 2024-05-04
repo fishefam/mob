@@ -1,6 +1,7 @@
 import type { BuildOptions, BuildResult, OnResolveArgs, OnResolveResult, Plugin } from 'esbuild'
 
 import { readdirSync, writeFileSync } from 'fs'
+import { resolve } from 'path'
 
 import { getBgColors, getDirs, getFgColors, getUtilColors } from './constants'
 
@@ -83,4 +84,36 @@ export function getBinCmds<T extends keyof BinCmds | true>(cmd?: T) {
   const cmds = <{ [key in keyof BinCmds]: string }>Object.fromEntries(files.map((file) => [file, file]))
   if (cmd) return <T extends true ? BinCmds : string>cmds[<keyof BinCmds>cmd]
   return <T extends true ? BinCmds : string>cmds
+}
+
+export function snakeToCamel(value: string) {
+  return value
+    .split('-')
+    .map((word, index) => word.charAt(0)[index === 0 ? 'toLowerCase' : 'toUpperCase']().concat(word.slice(1)))
+    .join('')
+}
+
+export function generateWorkerDTS() {
+  const { browser, node, source, types, workers } = getDirs()
+  const workerDirs = [browser, node].map((env) => resolveRelative(source, env, workers))
+  const groupedWorkerNames = workerDirs.map((dir) => {
+    try {
+      return readdirSync(dir, { recursive: true, withFileTypes: true })
+        .filter(({ name }) => /\.ts(x)?$/g.test(name))
+        .map(({ name }) => snakeToCamel(name).replace(/\.ts(x)?$/, ''))
+    } catch {
+      return ['never']
+    }
+  })
+  const [browserWorkers, nodeWorkers] = groupedWorkerNames.map((workers) =>
+    JSON.stringify(workers.map((worker) => `'${worker}'`).join(' | ')),
+  )
+  const dtsFile = resolve(types, 'workers.d.ts')
+  writeFileSync(
+    dtsFile,
+    `type NodeWorkerPaths = { [key in ${/never/.test(nodeWorkers) || nodeWorkers.length === 2 ? 'never' : nodeWorkers}]: string }\ntype BrowserWorkerPaths = { [key in ${/never/.test(browserWorkers) || browserWorkers.length === 2 ? 'never' : browserWorkers}]: string }\n`.replace(
+      /"/g,
+      '',
+    ),
+  )
 }

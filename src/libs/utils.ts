@@ -36,3 +36,9 @@ export function snakeToCamel(value: string) {
     .map((word, index) => word.charAt(0)[index === 0 ? 'toLowerCase' : 'toUpperCase']().concat(word.slice(1)))
     .join('')
 }
+
+export function removeExt(file: string) {
+  const fragments = file.split('.')
+  const filename = fragments.slice(0, fragments.length - 1)
+  return filename.join('.')
+}

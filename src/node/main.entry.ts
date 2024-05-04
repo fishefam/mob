@@ -5,7 +5,6 @@ import { app } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { Worker } from 'worker_threads'
 
-getWorkerPaths()
 main()
 
 async function main() {
@@ -23,7 +22,7 @@ async function launch(window: BrowserWindow) {
 }
 
 function watch(window: BrowserWindow) {
-  const { hotReloadWatcher } = getWorkerPaths()
-  const worker = new Worker(hotReloadWatcher)
+  const { node } = getWorkerPaths()
+  const worker = new Worker(node.hotReloadWatcher)
   worker.on('message', () => window.reload())
 }

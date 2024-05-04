@@ -1,18 +1,22 @@
 import { readdirSync } from 'fs'
 import { resolve } from 'path'
 
-import { resolveRelative, snakeToCamel } from './utils'
+import { removeExt, resolveRelative, snakeToCamel } from './utils'
 
 export function getWorkerPaths() {
-  const { browser, node, source, workers } = getDirs()
+  const { browser, node, workers } = getDirs()
   const workerDirs = [browser, node].map((env) => resolveRelative(env, workers))
-  const groupedWorkerPaths = workerDirs.map((dir) =>
-    Object.fromEntries(readdirSync(dir).map((file) => [snakeToCamel(file), file])),
+  const [browserWorkers, nodeWorkers] = workerDirs.map((dir) =>
+    Object.fromEntries(
+      readdirSync(dir, { recursive: true, withFileTypes: true })
+        .filter(({ name }) => /\.js$/g.test(name))
+        .map(({ name, path }) => [removeExt(snakeToCamel(name)), resolve(path, name)]),
+    ),
   )
-  console.log('dirs', workerDirs)
   return {
-    hotReloadWatcher: resolve('./node/workers/hot-reload-watcher.js'),
-  } as const
+    browser: <BrowserWorkerPaths>browserWorkers,
+    node: <NodeWorkerPaths>nodeWorkers,
+  }
 }
 
 export function getBgColors() {

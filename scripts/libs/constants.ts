@@ -27,11 +27,14 @@ export function getOptionEntries(platform: Platform): BuildEntries {
 export function getDirs() {
   return {
     assets: 'public',
+    browser: 'browser',
     electron: '.electron',
+    node: 'node',
     nodeModules: 'node_modules',
     out: 'dist',
     source: 'src',
     types: 'types',
+    workers: 'workers',
   } as const
 }
 

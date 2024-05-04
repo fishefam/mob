@@ -20,7 +20,7 @@ import {
 } from '../package.json'
 import { getDirs, getOptionEntries } from './libs/constants'
 import { clean, style } from './libs/plugins'
-import { colorize, getCurrentTime, hasDir, isProd, print } from './libs/utils'
+import { colorize, generateWorkerDTS, getCurrentTime, hasDir, isProd, print } from './libs/utils'
 
 if (!process.env.ELECTRON_CMD) main()
 
@@ -45,6 +45,7 @@ export async function main() {
 
 async function build(contexts: BuildContext[]) {
   const startTime = getCurrentTime()
+  generateWorkerDTS()
   await Promise.all(contexts.map((context) => context.cancel()))
   await Promise.all(
     contexts.map((context) =>
