@@ -32,6 +32,7 @@ export function getDirs() {
     node: 'node',
     nodeModules: 'node_modules',
     out: 'dist',
+    scripts: 'scripts',
     source: 'src',
     types: 'types',
     workers: 'workers',

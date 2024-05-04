@@ -1,3 +1,1 @@
-node_modules/.bin/esbuild scripts/lint-staged --bundle --platform=node --external:micromatch --format=cjs --outfile=node_modules/lint-staged.config.js &&
-node_modules/.bin/lint-staged --config node_modules/lint-staged.config.js
-
+node_modules/.bin/jiti scripts/pre-commit
