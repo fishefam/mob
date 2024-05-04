@@ -54,7 +54,7 @@ export function print(...values: unknown[]) {
   console.log(...values)
 }
 
-export function colorize<T extends string | unknown[] = string>(...inputs: ColorizeInput[]) {
+export function colorize<T extends string | unknown[] = string>(...inputs: ScriptLibs.ColorizeInput[]) {
   const bgColors = getBgColors()
   const colors = getFgColors()
   const { reset } = getUtilColors()

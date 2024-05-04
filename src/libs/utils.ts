@@ -11,7 +11,7 @@ export function print(...messages: unknown[]) {
   console.log(...messages)
 }
 
-export function colorize<T extends string | unknown[] = string>(...inputs: ColorizeInput[]) {
+export function colorize<T extends string | unknown[] = string>(...inputs: SrcLibs.ColorizeInput[]) {
   const bgColors = getBgColors()
   const colors = getFgColors()
   const { reset } = getUtilColors()

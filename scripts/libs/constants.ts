@@ -44,7 +44,7 @@ export function getElectronStaticFiles() {
   return [...forgeConfigFiles, 'package-lock.json', 'package.json'] as const
 }
 
-export function getBgColors() {
+export function getBgColors(): { [key in ScriptLibs.Color]: `\x1b[${number}m` } {
   return {
     black: '\x1b[40m',
     blue: '\x1b[44m',
@@ -55,7 +55,7 @@ export function getBgColors() {
     red: '\x1b[41m',
     white: '\x1b[47m',
     yellow: '\x1b[43m',
-  } as const
+  }
 }
 
 export function getUtilColors() {
@@ -67,7 +67,7 @@ export function getUtilColors() {
   } as const
 }
 
-export function getFgColors() {
+export function getFgColors(): { [key in ScriptLibs.Color]: `\x1b[${number}m` } {
   return {
     black: '\x1b[30m',
     blue: '\x1b[34m',

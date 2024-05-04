@@ -6,24 +6,21 @@
   "author": "Truong Nguyen",
   "main": "node/main.js",
   "scripts": {
-    "preinstall": "npx only-allow npm",
-    "postinstall": "jiti script/post-install",
     "build": "cross-env NODE_ENV=production jiti scripts/build",
     "clean": "rimraf .electron dist",
     "dev": "jiti scripts/build",
     "format": "prettier . --write",
+    "preinstall": "npx only-allow npm",
+    "postinstall": "jiti script/post-install",
     "lint": "eslint . --fix",
     "make": "cross-env NODE_ENV=production ELECTRON_CMD=make jiti scripts/electron",
     "pack": "cross-env NODE_ENV=production ELECTRON_CMD=package jiti scripts/electron",
     "prepare": "husky",
+    "purge": "jiti scripts/purge",
+    "sortpkg": "npx sort-package-json",
     "start": "cross-env NODE_ENV=production ELECTRON_CMD=start jiti scripts/electron",
     "type-check": "tsc"
   },
-  "engines": {
-    "node": "20.11.1",
-    "npm": ">=9"
-  },
-  "engineStrict": true,
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-accordion": "^1.1.2",
@@ -126,5 +123,10 @@
     "rimraf": "^5.0.5",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.5"
-  }
+  },
+  "engines": {
+    "node": "20.11.1",
+    "npm": ">=9"
+  },
+  "engineStrict": true
 }
