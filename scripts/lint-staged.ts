@@ -33,4 +33,4 @@ function createCommand(binCmd: BinCmds, args?: string, ...interpolates: string[]
   return command
 }
 
-export default config
+module.exports = config
