@@ -1,5 +1,5 @@
 import type { FSWatcher } from 'chokidar'
-import type { BuildContext, BuildOptions, Message } from 'esbuild'
+import type { Message } from 'esbuild'
 
 import { spawn } from 'child_process'
 import chokidar from 'chokidar'
@@ -18,16 +18,22 @@ import {
   name,
   version,
 } from '../package.json'
-import { getDirs, getOptionEntries } from './libs/constants'
+import { getDirs, getNodeVersion, getOptionEntries } from './libs/constants'
 import { clean, style } from './libs/plugins'
 import { colorize, generateWorkerDTS, getCurrentTime, hasDir, isProd, print } from './libs/utils'
 
 if (!process.env.ELECTRON_CMD) main()
 
+/**
+ * Main entry point for the script.
+ */
 export async function main() {
-  const isValidNodeVersion = process.version === 'v20.11.1'
+  const isValidNodeVersion = process.version === getNodeVersion()
   if (!isValidNodeVersion)
-    print(colorize({ bg: 'red', text: '[Error]' }), `Node ${process.version} is not allowed. Require version v20.11.1`)
+    print(
+      colorize({ bg: 'red', text: '[Error]' }),
+      `Node ${process.version} is not allowed. Supported version v20.11.1`,
+    )
   if (isValidNodeVersion) {
     const { ELECTRON_CMD } = process.env
     const { assets, source, types } = getDirs()
@@ -43,7 +49,11 @@ export async function main() {
   }
 }
 
-async function build(contexts: BuildContext[]) {
+/**
+ * Build the Electron application once using esbuild.
+ * @param contexts - Array of esbuild build contexts.
+ */
+async function build(contexts: Build.Context[]) {
   const startTime = getCurrentTime()
   generateWorkerDTS()
   await Promise.all(contexts.map((context) => context.cancel()))
@@ -68,18 +78,26 @@ async function build(contexts: BuildContext[]) {
   print(colorize({ bg: 'magenta', text: '[Build]' }), 'Complete in:', `${(endTime - startTime).toFixed(2)}s`)
 }
 
-function getOptions(options: {
-  cleanDisabled?: boolean
-  entry: BuildEntries
-  isConfig?: boolean
+/**
+ * Get options for building the Electron application.
+ * @param args.entry - Entry points for the build.
+ * @param args.platform - Platform for the build.
+ * @param args.cleanDisabled - [Optional] Indicates if cleaning is disabled.
+ * @param args.isConfig - [Optional] Indicates if the configuration is being used.
+ * @returns Options for the esbuild build process.
+ */
+function getOptions(args: {
+  cleanEnabled?: boolean
+  entry: Build.Entries
+  isBundled?: boolean
   platform: Platform
-}): BuildOptions {
-  const { cleanDisabled, entry, isConfig, platform } = options
+}): Build.Options {
+  const { cleanEnabled, entry, isBundled, platform } = args
   const { electron } = getDirs()
   return {
-    bundle: !isConfig,
+    bundle: isBundled,
     entryPoints: entry,
-    external: !isConfig ? ['electron'] : undefined,
+    external: isBundled ? ['electron'] : undefined,
     format: 'cjs',
     jsx: 'transform',
     legalComments: 'none',
@@ -88,14 +106,19 @@ function getOptions(options: {
     minify: isProd(),
     outdir: electron,
     platform,
-    plugins: [clean(cleanDisabled), style()],
+    plugins: [clean(cleanEnabled), style()],
     sourcemap: !isProd(),
     target: 'es2016',
     treeShaking: true,
   }
 }
 
-function watch(watcher: FSWatcher, contexts: BuildContext[]) {
+/**
+ * Watch for file changes and rebuild the Electron app accordingly.
+ * @param watcher - Chokidar file watcher.
+ * @param contexts - Array of esbuild build contexts.
+ */
+function watch(watcher: FSWatcher, contexts: Build.Context[]) {
   const { electron } = getDirs()
   if (hasDir(electron)) {
     const cp = spawn(`electron-forge start ${electron}`, { shell: true })
@@ -117,19 +140,24 @@ function watch(watcher: FSWatcher, contexts: BuildContext[]) {
   }
 }
 
+/**
+ * Generate and apply the updated package.json for Electron build.
+ */
 function applyPackageJSON() {
   const { electron } = getDirs()
-  const devDeps = {
-    '@electron-forge/cli': devDependencies['@electron-forge/cli'],
-    '@electron-forge/maker-deb': devDependencies['@electron-forge/maker-deb'],
-    '@electron-forge/maker-rpm': devDependencies['@electron-forge/maker-rpm'],
-    '@electron-forge/maker-squirrel': devDependencies['@electron-forge/maker-squirrel'],
-    '@electron-forge/maker-zip': devDependencies['@electron-forge/maker-zip'],
-    '@electron-forge/plugin-auto-unpack-natives': devDependencies['@electron-forge/plugin-auto-unpack-natives'],
-    '@electron-forge/plugin-fuses': devDependencies['@electron-forge/plugin-fuses'],
-    '@electron/fuses': devDependencies['@electron/fuses'],
-    'electron': devDependencies['electron'],
-  }
+  const devDeps = Object.fromEntries(
+    (<const>[
+      '@electron-forge/cli',
+      '@electron-forge/maker-deb',
+      '@electron-forge/maker-rpm',
+      '@electron-forge/maker-squirrel',
+      '@electron-forge/maker-zip',
+      '@electron-forge/plugin-auto-unpack-natives',
+      '@electron-forge/plugin-fuses',
+      '@electron/fuses',
+      'electron',
+    ]).map((pkg) => [pkg, devDependencies[pkg]]),
+  )
   const packageJSON = JSON.stringify({
     author,
     dependencies: { 'electron-squirrel-startup': dependencies['electron-squirrel-startup'] },
@@ -141,27 +169,24 @@ function applyPackageJSON() {
     version,
   })
   mkdirpSync(electron)
-  writeFileSync(resolve(electron, 'package.json'), packageJSON, { encoding: 'utf-8', flag: 'w' })
+  writeFileSync(resolve(electron, 'package.json'), packageJSON, { encoding: 'utf-8' })
 }
 
+/**
+ * Get build contexts for Electron application.
+ * @returns Array of esbuild build contexts.
+ */
 async function getContexts() {
-  const entries = ['node', 'browser'].map((platform) => ({
-    paths: getOptionEntries(<Platform>platform),
-    platform: <Platform>platform,
+  const entries = (<const>['node', 'browser']).map((platform) => ({
+    paths: getOptionEntries(platform),
+    platform: platform,
   }))
-  const configEntries: typeof entries = [
-    {
-      paths: [{ in: <'.entry.'>'forge.config.ts', out: 'forge.config' }],
-      platform: 'node',
-    },
-  ]
+  const configEntries: typeof entries = [{ paths: [{ in: 'forge.config.ts', out: 'forge.config' }], platform: 'node' }]
   const contexts = await Promise.all(
     configEntries
       .concat(entries)
       .map(({ paths, platform }, index) =>
-        esbuild.context(
-          getOptions({ cleanDisabled: [1, 2].includes(index), entry: paths, isConfig: index === 0, platform }),
-        ),
+        esbuild.context(getOptions({ cleanEnabled: index === 0, entry: paths, isBundled: index !== 0, platform })),
       ),
   )
   return contexts

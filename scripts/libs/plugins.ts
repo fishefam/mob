@@ -10,9 +10,9 @@ import tailwindcss from 'tailwindcss'
 import { getDirs, getElectronStaticFiles } from './constants'
 import { createOnEndPlugin, createOnStartPlugin } from './utils'
 
-export function clean(disabled = false) {
+export function clean(enabled = false) {
   return createOnStartPlugin('clean', () => {
-    if (!disabled) {
+    if (!enabled) {
       const { electron, out } = getDirs()
       try {
         rimrafSync([electron, out])

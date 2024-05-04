@@ -3,7 +3,7 @@ import type { Dirent } from 'fs'
 import { readdirSync } from 'fs'
 import { resolve } from 'path'
 
-export function getOptionEntries(platform: Platform): BuildEntries {
+export function getOptionEntries(platform: Platform): Build.Entries {
   const flagRegex = /\.entry\./
   const workerRegex = /workers/
   const { electron, source } = getDirs()
@@ -79,4 +79,8 @@ export function getFgColors() {
     white: '\x1b[37m',
     yellow: '\x1b[33m',
   } as const
+}
+
+export function getNodeVersion() {
+  return 'v20.11.1'
 }

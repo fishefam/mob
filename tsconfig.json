@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "esModuleInterop": true,
@@ -8,12 +9,17 @@
     "module": "commonjs",
     "noEmit": true,
     "paths": {
+      "@browser/*": ["src/browser/*"],
       "@components/*": ["src/browser/components/*"],
-      "@libs/*": ["src/libs/*"]
+      "@node/*": ["src/node/*"],
+      "@script-libs/*": ["scripts/libs/*"],
+      "@src-libs/*": ["src/libs/*"],
+      "@typings/*": ["types/*"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "es2016"
-  }
+  },
+  "exclude": ["src/assets"]
 }

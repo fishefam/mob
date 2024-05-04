@@ -6,6 +6,8 @@
   "author": "Truong Nguyen",
   "main": "node/main.js",
   "scripts": {
+    "preinstall": "npx only-allow npm",
+    "postinstall": "jiti script/post-install",
     "build": "cross-env NODE_ENV=production jiti scripts/build",
     "clean": "rimraf .electron dist",
     "dev": "jiti scripts/build",
