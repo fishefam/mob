@@ -1,5 +1,5 @@
-import { getWorkerPaths } from '@src-libs/constants'
-import { print } from '@src-libs/utils'
+import { getWorkerPaths } from '@libs/constants'
+import { print } from '@libs/utils'
 import { BrowserWindow } from 'electron'
 import { app } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'

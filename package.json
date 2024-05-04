@@ -11,7 +11,7 @@
     "dev": "jiti scripts/build",
     "format": "prettier . --write",
     "preinstall": "npx only-allow npm",
-    "postinstall": "jiti script/post-install",
+    "postinstall": "jiti scripts/post-install",
     "lint": "eslint . --fix",
     "make": "cross-env NODE_ENV=production ELECTRON_CMD=make jiti scripts/electron",
     "pack": "cross-env NODE_ENV=production ELECTRON_CMD=package jiti scripts/electron",

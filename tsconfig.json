@@ -11,9 +11,8 @@
     "paths": {
       "@browser/*": ["src/browser/*"],
       "@components/*": ["src/browser/components/*"],
+      "@libs/*": ["src/libs/*"],
       "@node/*": ["src/node/*"],
-      "@script-libs/*": ["scripts/libs/*"],
-      "@src-libs/*": ["src/libs/*"],
       "@typings/*": ["types/*"]
     },
     "resolveJsonModule": true,

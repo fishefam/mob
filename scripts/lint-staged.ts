@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-import { generateBinCmdsDTS } from '@script-libs/utils'
 import micromatch from 'micromatch'
+
+import { generateBinCmdsDTS } from './libs/utils'
 
 generateBinCmdsDTS()
 

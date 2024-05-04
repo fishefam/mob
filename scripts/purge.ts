@@ -1,7 +1,8 @@
-import { getDirs } from '@script-libs/constants'
-import { colorize, print } from '@script-libs/utils'
 import { spawnSync } from 'child_process'
 import { rimrafSync } from 'rimraf'
+
+import { getDirs } from './libs/constants'
+import { colorize, print } from './libs/utils'
 
 main()
 
@@ -17,5 +18,12 @@ function main() {
   })
   spawnSync('git reset --hard', { shell: true })
   print(colorize({ bg: 'blue', text: '[INFO]' }), 'Purging complete')
-  print(colorize({ bg: 'blue', text: '[INFO]' }), 'Execute `npm install` before running any other commands')
+  print(
+    colorize({ bg: 'blue', text: '[INFO]' }),
+    'Eslint WILL complain on most files after purging due to the missing of node_modules',
+  )
+  print(
+    colorize({ bg: 'blue', text: '[INFO]' }),
+    'Execute `npm install` [and reload code editor (Recommended)] before running any other commands',
+  )
 }

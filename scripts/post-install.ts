@@ -1,4 +1,4 @@
-import { generateBinCmdsDTS, generateWorkerDTS } from '@script-libs/utils'
+import { generateBinCmdsDTS, generateWorkerDTS } from './libs/utils'
 
 main()
 

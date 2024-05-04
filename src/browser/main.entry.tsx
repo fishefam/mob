@@ -1,4 +1,4 @@
-import { select } from '@src-libs/dom'
+import { select } from '@libs/dom'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
