@@ -3,6 +3,10 @@
 
 import micromatch from 'micromatch'
 
+import { generateBinCmds } from './libs/utils'
+
+generateBinCmds()
+
 const config: import('lint-staged').ConfigFn = async (files) => {
   const tsFiles = match(files, 'ts', 'tsx')
   const assortedFiles = match(files, 'html', 'css', 'json')
@@ -23,7 +27,7 @@ function match(files: string[], ...extensions: string[]) {
   )
 }
 
-function createCommand(binCmd: keyof BinCmds, args?: string, ...interpolates: string[]) {
+function createCommand(binCmd: BinCmds, args?: string, ...interpolates: string[]) {
   const prefix = 'node_modules/.bin/'
   let command = prefix + binCmd + (args ? ' ' + args : '')
   for (let i = 0; i < interpolates.length; i++) command = command.replace(new RegExp(`\\$\{?${i}}?`), interpolates[i])
