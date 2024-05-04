@@ -6,13 +6,18 @@ import { removeExt, resolveRelative, snakeToCamel } from './utils'
 export function getWorkerPaths() {
   const { browser, node, workers } = getDirs()
   const workerDirs = [browser, node].map((env) => resolveRelative(env, workers))
-  const [browserWorkers, nodeWorkers] = workerDirs.map((dir) =>
-    Object.fromEntries(
-      readdirSync(dir, { recursive: true, withFileTypes: true })
-        .filter(({ name }) => /\.js$/g.test(name))
-        .map(({ name, path }) => [removeExt(snakeToCamel(name)), resolve(path, name)]),
-    ),
-  )
+  const [browserWorkers, nodeWorkers] = workerDirs.map((dir) => {
+    try {
+      const makePath = (...rest: string[]) => resolve(__dirname.replace(/(node|browser)$/, ''), dir, ...rest)
+      return Object.fromEntries(
+        readdirSync(makePath(), { recursive: true })
+          .filter((file) => /\.js$/g.test(<string>file))
+          .map((file) => [removeExt(snakeToCamel(<string>file)), makePath(<string>file)]),
+      )
+    } catch {
+      return {}
+    }
+  })
   return {
     browser: <BrowserWorkerPaths>browserWorkers,
     node: <NodeWorkerPaths>nodeWorkers,

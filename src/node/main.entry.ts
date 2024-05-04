@@ -23,6 +23,6 @@ async function launch(window: BrowserWindow) {
 
 function watch(window: BrowserWindow) {
   const { node } = getWorkerPaths()
-  const worker = new Worker(node.hotReloadWatcher)
-  worker.on('message', () => window.reload())
+  const worker = new Worker(node.intervalMessage)
+  worker.on('message', (message) => window.webContents.executeJavaScript(`console.log(${JSON.stringify(message)})`))
 }
