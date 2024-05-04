@@ -19,5 +19,5 @@ function main() {
     platform: 'node',
   })
   console.log(lintStaged.out)
-  spawnSync(`${lintStaged.cmd} --config ${lintStaged.out}`)
+  spawnSync(`${lintStaged.cmd} --config ${lintStaged.out}.js`)
 }
