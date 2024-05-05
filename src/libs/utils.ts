@@ -42,3 +42,7 @@ export function removeExt(file: string) {
   const filename = fragments.slice(0, fragments.length - 1)
   return filename.join('.')
 }
+
+export function isProd() {
+  return process.env.APP_ENV !== 'development'
+}

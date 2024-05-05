@@ -121,7 +121,7 @@ function getOptions(args: {
 function watch(watcher: FSWatcher, contexts: Build.Context[]) {
   const { electron } = getDirs()
   if (hasDir(electron)) {
-    const cp = spawn(`electron-forge start ${electron}`, { shell: true })
+    const cp = spawn(`cross-env APP_ENV=development electron-forge start ${electron}`, { shell: true })
     cp.stdout.setEncoding('utf-8')
     cp.stdout.on('close', () => process.exit())
     cp.stdout.on('data', (data) => print(data.trim()))

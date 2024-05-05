@@ -18,10 +18,11 @@ declare module NodeJS {
   interface ProcessEnv
     extends NodeVariables<
       {
-        DEV_URLS: ArrayString
+        APP_DEV_URLS: ArrayString
+        APP_ENV: 'development' | 'production'
         ELECTRON_CMD: 'make' | 'package' | 'start'
         ENV: 'development' | 'production'
-      } & { [key in 'PASSWORD' | 'USER']: string }
+      } & { [key in `APP_${'PASSWORD' | 'USER'}`]: string }
     > {}
 }
 
